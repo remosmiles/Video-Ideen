@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mein Video-Ideen Ordner</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f8fafc;
+            --text: #1e293b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 { font-size: 1.5rem; margin-bottom: 1.5rem; text-align: center; }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            outline: none;
+        }
+
+        button {
+            padding: 10px 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:hover { background: #1d4ed8; }
+
+        ul { list-style: none; padding: 0; }
+
+        li {
+            background: #f1f5f9;
+            margin-bottom: 8px;
+            padding: 12px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .delete-btn {
+            background: #ef4444;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Video-Ideen 📂</h1>
+    
+    <div class="input-group">
+        <input type="text" id="ideaInput" placeholder="Neue Videoidee eingeben...">
+        <button onclick="addIdea()">Hinzufügen</button>
+    </div>
+
+    <ul id="ideaList"></ul>
+</div>
+
+<script>
+    const ideaInput = document.getElementById('ideaInput');
+    const ideaList = document.getElementById('ideaList');
+
+    // Lade gespeicherte Ideen beim Start
+    document.addEventListener('DOMContentLoaded', getIdeas);
+
+    function addIdea() {
+        if (ideaInput.value === '') return;
+
+        const ideaText = ideaInput.value;
+        createIdeaElement(ideaText);
+        saveLocal(ideaText);
+        
+        ideaInput.value = '';
+    }
+
+    function createIdeaElement(text) {
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <span>${text}</span>
+            <button class="delete-btn" onclick="removeIdea(this)">Löschen</button>
+        `;
+        ideaList.appendChild(li);
+    }
+
+    function saveLocal(idea) {
+        let ideas = localStorage.getItem('videoIdeen') ? JSON.parse(localStorage.getItem('videoIdeen')) : [];
+        ideas.push(idea);
+        localStorage.setItem('videoIdeen', JSON.stringify(ideas));
+    }
+
+    function getIdeas() {
+        let ideas = localStorage.getItem('videoIdeen') ? JSON.parse(localStorage.getItem('videoIdeen')) : [];
+        ideas.forEach(idea => createIdeaElement(idea));
+    }
+
+    function removeIdea(btn) {
+        const text = btn.parentElement.firstChild.textContent.trim();
+        btn.parentElement.remove();
+        
+        let ideas = JSON.parse(localStorage.getItem('videoIdeen'));
+        const filteredIdeas = ideas.filter(i => i !== text);
+        localStorage.setItem('videoIdeen', JSON.stringify(filteredIdeas));
+    }
+
+    // Enter-Taste zum Hinzufügen nutzen
+    ideaInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addIdea();
+    });
+</script>
+
+</body>
+</html>
