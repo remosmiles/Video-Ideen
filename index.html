@@ -3,195 +3,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Vault | Deine Ideen</title>
+    <title>Video Vault Pro | Cloud Sync</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+
         :root {
-            --accent: #6366f1;
-            --accent-hover: #4f46e5;
-            --bg: #0f172a;
-            --card-bg: #1e293b;
-            --text-main: #f8fafc;
-            --text-dim: #94a3b8;
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.4);
+            --bg: #030712;
+            --surface: #111827;
+            --border: #1f2937;
+            --text: #f9fafb;
+            --text-muted: #9ca3af;
         }
 
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--bg);
-            color: var(--text-main);
-            margin: 0;
+            color: var(--text);
             display: flex;
             justify-content: center;
             min-height: 100vh;
-            padding: 40px 20px;
+            padding: 2rem;
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(168, 85, 247, 0.1) 0%, transparent 50%);
         }
 
-        .app-container {
+        .container {
             width: 100%;
-            max-width: 600px;
+            max-width: 800px;
         }
 
-        header {
+        .glass-header {
             text-align: center;
+            padding: 3rem 0;
             margin-bottom: 2rem;
         }
 
         h1 {
-            font-size: 2.5rem;
-            background: linear-gradient(to right, #818cf8, #c084fc);
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, #fff 0%, #6366f1 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 0.5rem;
         }
 
-        .input-area {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        .input-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 24px;
             display: flex;
-            gap: 12px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255,255,255,0.1);
+            gap: 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            margin-bottom: 3rem;
+            backdrop-filter: blur(10px);
         }
 
         input {
             flex: 1;
-            background: #0f172a;
-            border: 1px solid #334155;
-            padding: 12px 16px;
-            border-radius: 10px;
+            background: transparent;
+            border: none;
             color: white;
+            font-size: 1.1rem;
             outline: none;
-            transition: border 0.2s;
+            padding: 0.5rem;
         }
-
-        input:focus { border-color: var(--accent); }
 
         .add-btn {
-            background: var(--accent);
+            background: var(--primary);
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 10px;
+            padding: 0.8rem 2rem;
+            border-radius: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 20px var(--primary-glow);
         }
 
-        .add-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+        .add-btn:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 0 30px var(--primary-glow);
+        }
 
-        .idea-list {
+        .grid {
             display: grid;
-            gap: 12px;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
         }
 
         .idea-card {
-            background: var(--card-bg);
-            padding: 16px;
-            border-radius: 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 20px;
+            position: relative;
+            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease-out;
             display: flex;
+            flex-direction: column;
             justify-content: space-between;
-            align-items: center;
-            border: 1px solid rgba(255,255,255,0.05);
-            animation: slideUp 0.4s ease;
         }
 
-        .delete-icon {
+        .idea-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        .idea-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            word-wrap: break-word;
+        }
+
+        .delete-btn {
+            align-self: flex-end;
             background: rgba(239, 68, 68, 0.1);
             color: #ef4444;
             border: none;
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
             font-size: 0.8rem;
+            cursor: pointer;
             transition: 0.2s;
         }
 
-        .delete-icon:hover { background: #ef4444; color: white; }
+        .delete-btn:hover { background: #ef4444; color: white; }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
         }
 
-        .footer-note {
+        .loader {
             text-align: center;
-            color: var(--text-dim);
-            font-size: 0.8rem;
-            margin-top: 30px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            margin-bottom: 2rem;
         }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <header>
-        <h1>Video Vault</h1>
-        <p style="color: var(--text-dim)">Halte deine nächsten viralen Hits fest.</p>
-    </header>
-
-    <div class="input-area">
-        <input type="text" id="ideaInput" placeholder="Deine neue Videoidee...">
-        <button class="add-btn" onclick="addIdea()">Speichern</button>
+<div class="container">
+    <div class="glass-header">
+        <h1>VideoVault.</h1>
+        <p style="color: var(--text-muted)">Deine Cloud-Zentrale für virale Konzepte</p>
     </div>
 
-    <div class="idea-list" id="ideaList"></div>
-
-    <div class="footer-note">
-        Hinweis: Daten werden aktuell lokal in diesem Browser gespeichert.
+    <div class="input-card">
+        <input type="text" id="ideaInput" placeholder="Was ist dein nächster Hit?">
+        <button class="add-btn" onclick="addIdea()">Hinzufügen</button>
     </div>
+
+    <div id="loader" class="loader">Verbindung zur Cloud wird hergestellt...</div>
+    <div class="grid" id="ideaGrid"></div>
 </div>
 
 <script>
+    // Deine Supabase Verbindungsdaten
+    const SUPABASE_URL = 'https://nukaszowvngovgbdeycf.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_FucYC62e6dtviy5UnS9OoQ_OTg0QvGc';
+    
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const ideaInput = document.getElementById('ideaInput');
-    const ideaList = document.getElementById('ideaList');
+    const ideaGrid = document.getElementById('ideaGrid');
+    const loader = document.getElementById('loader');
 
-    document.addEventListener('DOMContentLoaded', loadIdeas);
+    // Lade die Ideen beim Start
+    loadIdeas();
 
-    function addIdea() {
+    async function loadIdeas() {
+        loader.textContent = "Synchronisiere mit der Cloud...";
+        
+        const { data, error } = await supabase
+            .from('ideas')
+            .select('*')
+            .order('id', { ascending: false });
+
+        if (error) {
+            console.error("Datenbank-Fehler:", error);
+            loader.textContent = "Fehler beim Laden. Hast du die Tabelle 'ideas' ohne RLS erstellt?";
+            loader.style.color = "#ef4444";
+        } else {
+            if(data.length === 0) {
+                loader.textContent = "Noch keine Ideen vorhanden. Leg los!";
+            } else {
+                loader.textContent = data.length + " Idee(n) sicher in der Cloud gespeichert.";
+            }
+            renderIdeas(data);
+        }
+    }
+
+    function renderIdeas(ideas) {
+        ideaGrid.innerHTML = '';
+        ideas.forEach(idea => {
+            const card = document.createElement('div');
+            card.className = 'idea-card';
+            card.innerHTML = `
+                <div class="idea-text">${idea.text}</div>
+                <button class="delete-btn" onclick="deleteIdea(${idea.id})">Löschen</button>
+            `;
+            ideaGrid.appendChild(card);
+        });
+    }
+
+    async function addIdea() {
         const text = ideaInput.value.trim();
         if (!text) return;
 
-        const id = Date.now();
-        createUIElement(text, id);
-        saveIdea(text, id);
-        ideaInput.value = '';
+        ideaInput.disabled = true; // Sperren während des Speicherns
+        
+        const { data, error } = await supabase
+            .from('ideas')
+            .insert([{ text: text }]);
+
+        ideaInput.disabled = false;
+
+        if (error) {
+            alert("Fehler beim Speichern! Schau in die Browser-Konsole (F12) für Details.");
+            console.error(error);
+        } else {
+            ideaInput.value = '';
+            loadIdeas(); // Lade die Liste neu, um die neue Idee anzuzeigen
+        }
     }
 
-    function createUIElement(text, id) {
-        const div = document.createElement('div');
-        div.className = 'idea-card';
-        div.setAttribute('data-id', id);
-        div.innerHTML = `
-            <span>${text}</span>
-            <button class="delete-icon" onclick="removeIdea(${id})">Löschen</button>
-        `;
-        ideaList.prepend(div);
+    async function deleteIdea(id) {
+        const { error } = await supabase
+            .from('ideas')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            alert("Fehler beim Löschen!");
+            console.error(error);
+        } else {
+            loadIdeas(); // Lade die Liste neu, um die gelöschte Idee zu entfernen
+        }
     }
 
-    function saveIdea(text, id) {
-        let ideas = JSON.parse(localStorage.getItem('vault_ideas') || '[]');
-        ideas.push({ text, id });
-        localStorage.setItem('vault_ideas', JSON.stringify(ideas));
-    }
-
-    function loadIdeas() {
-        let ideas = JSON.parse(localStorage.getItem('vault_ideas') || '[]');
-        ideas.forEach(item => createUIElement(item.text, item.id));
-    }
-
-    function removeIdea(id) {
-        const element = document.querySelector(`[data-id="${id}"]`);
-        element.style.opacity = '0';
-        setTimeout(() => {
-            element.remove();
-            let ideas = JSON.parse(localStorage.getItem('vault_ideas') || '[]');
-            ideas = ideas.filter(i => i.id !== id);
-            localStorage.setItem('vault_ideas', JSON.stringify(ideas));
-        }, 300);
-    }
-
-    ideaInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addIdea(); });
+    // Enter-Taste zum Speichern nutzen
+    ideaInput.addEventListener('keypress', (e) => { 
+        if (e.key === 'Enter') addIdea(); 
+    });
 </script>
 
 </body>
