@@ -26,6 +26,7 @@
             color: var(--text);
             display: flex;
             justify-content: center;
+            align-items: flex-start;
             min-height: 100vh;
             padding: 2rem;
             background-image: 
@@ -33,16 +34,71 @@
                 radial-gradient(circle at 100% 100%, rgba(168, 85, 247, 0.1) 0%, transparent 50%);
         }
 
-        .container {
+        /* --- SPERRBILDSCHIRM STYLES --- */
+        #lock-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .lock-box {
+            background: var(--surface);
+            padding: 3rem;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .lock-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .pin-input {
+            background: rgba(0,0,0,0.3);
+            border: 2px solid var(--border);
+            color: white;
+            font-size: 2rem;
+            text-align: center;
+            letter-spacing: 10px;
+            padding: 1rem;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 250px;
+            margin-bottom: 1.5rem;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .pin-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .error-msg {
+            color: #ef4444;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        /* --- APP STYLES --- */
+        #app-content {
+            display: none; /* App ist anfangs versteckt */
             width: 100%;
             max-width: 800px;
         }
 
-        .glass-header {
-            text-align: center;
-            padding: 3rem 0;
-            margin-bottom: 2rem;
-        }
+        .glass-header { text-align: center; padding: 2rem 0; margin-bottom: 2rem; }
 
         h1 {
             font-size: 3.5rem;
@@ -66,7 +122,7 @@
             backdrop-filter: blur(10px);
         }
 
-        input {
+        .app-input {
             flex: 1;
             background: transparent;
             border: none;
@@ -76,7 +132,7 @@
             padding: 0.5rem;
         }
 
-        .add-btn {
+        .btn {
             background: var(--primary);
             color: white;
             border: none;
@@ -88,16 +144,12 @@
             box-shadow: 0 0 20px var(--primary-glow);
         }
 
-        .add-btn:hover {
+        .btn:hover {
             transform: translateY(-2px) scale(1.02);
             box-shadow: 0 0 30px var(--primary-glow);
         }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1.5rem;
-        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem; }
 
         .idea-card {
             background: var(--surface);
@@ -112,18 +164,9 @@
             justify-content: space-between;
         }
 
-        .idea-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-5px);
-        }
-
-        .idea-text {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
-            word-wrap: break-word;
-        }
-
+        .idea-card:hover { border-color: var(--primary); transform: translateY(-5px); }
+        .idea-text { font-size: 1.1rem; line-height: 1.6; margin-bottom: 1.5rem; word-wrap: break-word; }
+        
         .delete-btn {
             align-self: flex-end;
             background: rgba(239, 68, 68, 0.1);
@@ -135,34 +178,33 @@
             cursor: pointer;
             transition: 0.2s;
         }
-
         .delete-btn:hover { background: #ef4444; color: white; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        .loader {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-top: 1rem;
-            margin-bottom: 2rem;
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .loader { text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-top: 1rem; margin-bottom: 2rem; }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div id="lock-screen">
+    <div class="lock-box">
+        <div class="lock-icon">🔒</div>
+        <h2 style="margin-bottom: 2rem; font-weight: 600;">Zugriff gesperrt</h2>
+        <div id="errorMsg" class="error-msg">Falscher Code! Versuch es nochmal.</div>
+        <input type="password" id="pinInput" class="pin-input" placeholder="••••" maxlength="4">
+        <button class="btn" onclick="checkPin()" style="width: 100%;">Entsperren</button>
+    </div>
+</div>
+
+<div id="app-content">
     <div class="glass-header">
         <h1>VideoVault.</h1>
         <p style="color: var(--text-muted)">Deine Cloud-Zentrale für virale Konzepte</p>
     </div>
 
     <div class="input-card">
-        <input type="text" id="ideaInput" placeholder="Was ist dein nächster Hit?">
-        <button class="add-btn" onclick="addIdea()">Hinzufügen</button>
+        <input type="text" id="ideaInput" class="app-input" placeholder="Was ist dein nächster Hit?">
+        <button class="btn" onclick="addIdea()">Hinzufügen</button>
     </div>
 
     <div id="loader" class="loader">Verbindung zur Cloud wird hergestellt...</div>
@@ -170,37 +212,64 @@
 </div>
 
 <script>
-    // Deine Supabase Verbindungsdaten
+    // --- SPERRBILDSCHIRM LOGIK ---
+    const SECRET_CODE = "1312"; // <-- Hier ist dein Passwort!
+    
+    const lockScreen = document.getElementById('lock-screen');
+    const appContent = document.getElementById('app-content');
+    const pinInput = document.getElementById('pinInput');
+    const errorMsg = document.getElementById('errorMsg');
+
+    // Prüfen, ob die Seite in dieser Sitzung schon entsperrt wurde
+    if (sessionStorage.getItem('vault_unlocked') === 'true') {
+        unlockApp();
+    }
+
+    function checkPin() {
+        if (pinInput.value === SECRET_CODE) {
+            sessionStorage.setItem('vault_unlocked', 'true'); // Speichert den Login für diese Tab-Sitzung
+            unlockApp();
+        } else {
+            errorMsg.style.display = 'block';
+            pinInput.value = '';
+            pinInput.focus();
+        }
+    }
+
+    // Enter-Taste für den Code
+    pinInput.addEventListener('keypress', (e) => { 
+        if (e.key === 'Enter') checkPin(); 
+    });
+
+    function unlockApp() {
+        lockScreen.style.display = 'none';
+        appContent.style.display = 'block';
+        // Erst jetzt, wenn der Code stimmt, werden die Daten aus der Datenbank geladen!
+        loadIdeas(); 
+    }
+
+
+    // --- DATENBANK LOGIK (SUPABASE) ---
     const SUPABASE_URL = 'https://nukaszowvngovgbdeycf.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_FucYC62e6dtviy5UnS9OoQ_OTg0QvGc';
-    
-    // FEHLER BEHOBEN: Die Variable heißt nun "db" statt "supabase", um Namenskonflikte zu vermeiden!
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     
     const ideaInput = document.getElementById('ideaInput');
     const ideaGrid = document.getElementById('ideaGrid');
     const loader = document.getElementById('loader');
 
-    // Lade die Ideen beim Start
-    loadIdeas();
-
     async function loadIdeas() {
-        loader.textContent = "Synchronisiere mit der Cloud...";
-        
-        const { data, error } = await db
-            .from('ideas')
-            .select('*')
-            .order('id', { ascending: false });
+        loader.textContent = "Lade Ideen aus der Cloud...";
+        const { data, error } = await db.from('ideas').select('*').order('id', { ascending: false });
 
         if (error) {
-            console.error("Datenbank-Fehler:", error);
-            loader.textContent = "Fehler beim Laden. Hast du die Tabelle 'ideas' ohne RLS erstellt?";
+            loader.textContent = "Fehler beim Laden!";
             loader.style.color = "#ef4444";
         } else {
             if(data.length === 0) {
                 loader.textContent = "Noch keine Ideen vorhanden. Leg los!";
             } else {
-                loader.textContent = data.length + " Idee(n) sicher in der Cloud gespeichert.";
+                loader.textContent = data.length + " Idee(n) sicher gespeichert.";
             }
             renderIdeas(data);
         }
@@ -223,38 +292,19 @@
         const text = ideaInput.value.trim();
         if (!text) return;
 
-        ideaInput.disabled = true; // Sperren während des Speicherns
-        
-        const { data, error } = await db
-            .from('ideas')
-            .insert([{ text: text }]);
-
+        ideaInput.disabled = true;
+        const { data, error } = await db.from('ideas').insert([{ text: text }]);
         ideaInput.disabled = false;
 
         if (error) {
-            alert("Fehler beim Speichern! Schau in die Browser-Konsole (F12) für Details.");
-            console.error(error);
+            alert("Fehler beim Speichern!");
         } else {
             ideaInput.value = '';
-            loadIdeas(); // Lade die Liste neu, um die neue Idee anzuzeigen
+            loadIdeas();
         }
     }
 
-    async function deleteIdea(id) {
-        const { error } = await db
-            .from('ideas')
-            .delete()
-            .eq('id', id);
-
-        if (error) {
-            alert("Fehler beim Löschen!");
-            console.error(error);
-        } else {
-            loadIdeas(); // Lade die Liste neu, um die gelöschte Idee zu entfernen
-        }
-    }
-
-    // Enter-Taste zum Speichern nutzen
+    // Enter-Taste zum Speichern einer Idee
     ideaInput.addEventListener('keypress', (e) => { 
         if (e.key === 'Enter') addIdea(); 
     });
