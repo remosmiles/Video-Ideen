@@ -3,147 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mein Video-Ideen Ordner</title>
+    <title>Video Vault | Deine Ideen</title>
     <style>
         :root {
-            --primary: #2563eb;
-            --bg: #f8fafc;
-            --text: #1e293b;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, sans-serif;
             background-color: var(--bg);
-            color: var(--text);
+            color: var(--text-main);
+            margin: 0;
             display: flex;
             justify-content: center;
-            padding: 20px;
+            min-height: 100vh;
+            padding: 40px 20px;
         }
 
-        .container {
+        .app-container {
             width: 100%;
-            max-width: 500px;
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
         }
 
-        h1 { font-size: 1.5rem; margin-bottom: 1.5rem; text-align: center; }
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
 
-        .input-group {
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .input-area {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         input {
             flex: 1;
-            padding: 10px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            padding: 12px 16px;
+            border-radius: 10px;
+            color: white;
             outline: none;
+            transition: border 0.2s;
         }
 
-        button {
-            padding: 10px 15px;
-            background: var(--primary);
+        input:focus { border-color: var(--accent); }
+
+        .add-btn {
+            background: var(--accent);
             color: white;
             border: none;
-            border-radius: 6px;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
             cursor: pointer;
+            transition: all 0.2s;
         }
 
-        button:hover { background: #1d4ed8; }
+        .add-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
 
-        ul { list-style: none; padding: 0; }
+        .idea-list {
+            display: grid;
+            gap: 12px;
+        }
 
-        li {
-            background: #f1f5f9;
-            margin-bottom: 8px;
-            padding: 12px;
-            border-radius: 6px;
+        .idea-card {
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            animation: fadeIn 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.05);
+            animation: slideUp 0.4s ease;
         }
 
-        .delete-btn {
-            background: #ef4444;
-            padding: 5px 10px;
+        .delete-icon {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
             font-size: 0.8rem;
+            transition: 0.2s;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
+        .delete-icon:hover { background: #ef4444; color: white; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            margin-top: 30px;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Video-Ideen 📂</h1>
-    
-    <div class="input-group">
-        <input type="text" id="ideaInput" placeholder="Neue Videoidee eingeben...">
-        <button onclick="addIdea()">Hinzufügen</button>
+<div class="app-container">
+    <header>
+        <h1>Video Vault</h1>
+        <p style="color: var(--text-dim)">Halte deine nächsten viralen Hits fest.</p>
+    </header>
+
+    <div class="input-area">
+        <input type="text" id="ideaInput" placeholder="Deine neue Videoidee...">
+        <button class="add-btn" onclick="addIdea()">Speichern</button>
     </div>
 
-    <ul id="ideaList"></ul>
+    <div class="idea-list" id="ideaList"></div>
+
+    <div class="footer-note">
+        Hinweis: Daten werden aktuell lokal in diesem Browser gespeichert.
+    </div>
 </div>
 
 <script>
     const ideaInput = document.getElementById('ideaInput');
     const ideaList = document.getElementById('ideaList');
 
-    // Lade gespeicherte Ideen beim Start
-    document.addEventListener('DOMContentLoaded', getIdeas);
+    document.addEventListener('DOMContentLoaded', loadIdeas);
 
     function addIdea() {
-        if (ideaInput.value === '') return;
+        const text = ideaInput.value.trim();
+        if (!text) return;
 
-        const ideaText = ideaInput.value;
-        createIdeaElement(ideaText);
-        saveLocal(ideaText);
-        
+        const id = Date.now();
+        createUIElement(text, id);
+        saveIdea(text, id);
         ideaInput.value = '';
     }
 
-    function createIdeaElement(text) {
-        const li = document.createElement('li');
-        li.innerHTML = `
+    function createUIElement(text, id) {
+        const div = document.createElement('div');
+        div.className = 'idea-card';
+        div.setAttribute('data-id', id);
+        div.innerHTML = `
             <span>${text}</span>
-            <button class="delete-btn" onclick="removeIdea(this)">Löschen</button>
+            <button class="delete-icon" onclick="removeIdea(${id})">Löschen</button>
         `;
-        ideaList.appendChild(li);
+        ideaList.prepend(div);
     }
 
-    function saveLocal(idea) {
-        let ideas = localStorage.getItem('videoIdeen') ? JSON.parse(localStorage.getItem('videoIdeen')) : [];
-        ideas.push(idea);
-        localStorage.setItem('videoIdeen', JSON.stringify(ideas));
+    function saveIdea(text, id) {
+        let ideas = JSON.parse(localStorage.getItem('vault_ideas') || '[]');
+        ideas.push({ text, id });
+        localStorage.setItem('vault_ideas', JSON.stringify(ideas));
     }
 
-    function getIdeas() {
-        let ideas = localStorage.getItem('videoIdeen') ? JSON.parse(localStorage.getItem('videoIdeen')) : [];
-        ideas.forEach(idea => createIdeaElement(idea));
+    function loadIdeas() {
+        let ideas = JSON.parse(localStorage.getItem('vault_ideas') || '[]');
+        ideas.forEach(item => createUIElement(item.text, item.id));
     }
 
-    function removeIdea(btn) {
-        const text = btn.parentElement.firstChild.textContent.trim();
-        btn.parentElement.remove();
-        
-        let ideas = JSON.parse(localStorage.getItem('videoIdeen'));
-        const filteredIdeas = ideas.filter(i => i !== text);
-        localStorage.setItem('videoIdeen', JSON.stringify(filteredIdeas));
+    function removeIdea(id) {
+        const element = document.querySelector(`[data-id="${id}"]`);
+        element.style.opacity = '0';
+        setTimeout(() => {
+            element.remove();
+            let ideas = JSON.parse(localStorage.getItem('vault_ideas') || '[]');
+            ideas = ideas.filter(i => i.id !== id);
+            localStorage.setItem('vault_ideas', JSON.stringify(ideas));
+        }, 300);
     }
 
-    // Enter-Taste zum Hinzufügen nutzen
-    ideaInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') addIdea();
-    });
+    ideaInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addIdea(); });
 </script>
 
 </body>
