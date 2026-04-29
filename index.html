@@ -174,7 +174,9 @@
     const SUPABASE_URL = 'https://nukaszowvngovgbdeycf.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_FucYC62e6dtviy5UnS9OoQ_OTg0QvGc';
     
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // FEHLER BEHOBEN: Die Variable heißt nun "db" statt "supabase", um Namenskonflikte zu vermeiden!
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
     const ideaInput = document.getElementById('ideaInput');
     const ideaGrid = document.getElementById('ideaGrid');
     const loader = document.getElementById('loader');
@@ -185,7 +187,7 @@
     async function loadIdeas() {
         loader.textContent = "Synchronisiere mit der Cloud...";
         
-        const { data, error } = await supabase
+        const { data, error } = await db
             .from('ideas')
             .select('*')
             .order('id', { ascending: false });
@@ -223,7 +225,7 @@
 
         ideaInput.disabled = true; // Sperren während des Speicherns
         
-        const { data, error } = await supabase
+        const { data, error } = await db
             .from('ideas')
             .insert([{ text: text }]);
 
@@ -239,7 +241,7 @@
     }
 
     async function deleteIdea(id) {
-        const { error } = await supabase
+        const { error } = await db
             .from('ideas')
             .delete()
             .eq('id', id);
